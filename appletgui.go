@@ -12,9 +12,10 @@ import (
 	stdrw "github.com/gboulant/dingo-stdrw"
 )
 
-var NewExample func(name string, comment string, function func() error) *applet.Example = applet.NewExample
+// AddApplet is a proxy to the core package function
+var AddApplet func(name string, comment string, function func() error) *applet.Applet = applet.AddApplet
 
-func StartExampleApp(title string) {
+func StartApplication(title string) {
 	a := app.New()
 	w := a.NewWindow(title)
 
@@ -25,10 +26,10 @@ func StartExampleApp(title string) {
 	text := widget.NewTextGrid()
 	ctnRight.Add(text)
 
-	names := applet.GetExampleNames()
+	names := applet.GetAppletNames()
 	btnDemos := make([]*widget.Button, len(names))
 	for i, name := range names {
-		example, _ := applet.GetExample(name)
+		example, _ := applet.GetApplet(name)
 		btnlabel := fmt.Sprintf("%s - %s", example.Name, example.Comment)
 		btnDemos[i] = widget.NewButton(btnlabel, func() {
 			text.SetText("")
