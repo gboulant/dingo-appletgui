@@ -15,16 +15,23 @@ import (
 // AddApplet is a proxy to the core package function
 var AddApplet func(name string, comment string, function func() error) *applet.Applet = applet.AddApplet
 
-func StartApplication(title string) {
+func StartApplication(title string) error {
 	a := app.New()
 	w := a.NewWindow(title)
-
-	reader, _ := stdrw.NewStdoutReader()
-	defer reader.Close()
 
 	ctnRight := container.NewVBox()
 	text := widget.NewTextGrid()
 	ctnRight.Add(text)
+
+	handler, err := stdrw.NewStdoutHandler(func(line string) {
+		fyne.Do(func() {
+			text.Append(line)
+			text.Refresh()
+		})
+	})
+	if err != nil {
+		return err
+	}
 
 	names := applet.GetAppletNames()
 	btnDemos := make([]*widget.Button, len(names))
@@ -57,15 +64,8 @@ func StartApplication(title string) {
 	ctnLeft.Add(layout.NewSpacer())
 	ctnLeft.Add(btnQuit)
 
-	go func() {
-		for {
-			line, _ := reader.ReadString('\n')
-			fyne.Do(func() {
-				text.Append(line)
-				text.Refresh()
-			})
-		}
-	}()
+	handler.Start()
+	defer handler.Stop()
 
 	w.SetContent(container.NewHBox(ctnLeft, ctnRight))
 	w.Resize(fyne.NewSize(600, 400))
@@ -73,4 +73,5 @@ func StartApplication(title string) {
 	w.SetMaster()
 	w.Show()
 	a.Run()
+	return nil
 }
