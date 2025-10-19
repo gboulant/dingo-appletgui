@@ -12,15 +12,12 @@ import (
 	stdrw "github.com/gboulant/dingo-stdrw"
 )
 
-// AddApplet is a proxy to the core package function
-var AddApplet func(name string, comment string, function func() error) *applet.Applet = applet.AddApplet
-
 type AppletGui struct {
 	Title      string
 	app        fyne.App
 	win        fyne.Window
 	ctnActions *fyne.Container
-	textArea   *widget.TextGrid
+	TextArea   *TextAreaWidget
 	stdOutHdl  *stdrw.StdoutHandler
 }
 
@@ -44,12 +41,9 @@ func (g *AppletGui) Setup() error {
 	w := a.NewWindow(g.Title)
 
 	// --------------------------------------
-	// Text Area (on the right)
-	ctnRight := container.NewVBox()
-	textArea := widget.NewTextGrid()
-	//ctnScroll := container.NewScroll(textArea)
-	//ctnRight.Add(ctnScroll)
-	ctnRight.Add(textArea)
+	// Text Area (center of the BorderLayout)
+	textArea := NewTextArea()
+	ctnCenter := container.NewVScroll(textArea.TextWidget)
 
 	// --------------------------------------
 	// Action Area (on the left)
@@ -59,16 +53,18 @@ func (g *AppletGui) Setup() error {
 		fmt.Println("done")
 	})
 
-	ctnLeft := container.NewVBox()
+	// Define a customizable actions container embedded in a fixed
+	// container that will be placed in the left boder of the window
+	// border layout
 	ctnActions := container.NewVBox()
+	ctnLeft := container.NewVBox()
 	ctnLeft.Add(ctnActions)
 	ctnLeft.Add(layout.NewSpacer())
 	ctnLeft.Add(btnQuit)
 
 	// --------------------------------------
-	// Packing all together
-	w.SetContent(container.NewHBox(ctnLeft, ctnRight))
-
+	// Packing all together inn a border layout
+	w.SetContent(container.NewBorder(nil, nil, ctnLeft, nil, ctnCenter))
 	w.Resize(fyne.NewSize(600, 400))
 	w.CenterOnScreen()
 	w.SetMaster()
@@ -76,7 +72,7 @@ func (g *AppletGui) Setup() error {
 	// --------------------------------------
 	// Setup the redirection from stdout toward the text area.
 	h, err := stdrw.NewStdoutHandler(func(line string) {
-		g.TextAppend(line)
+		g.TextArea.Append(line)
 	})
 	if err != nil {
 		return err
@@ -89,18 +85,9 @@ func (g *AppletGui) Setup() error {
 	g.app = a
 	g.win = w
 	g.ctnActions = ctnActions
-	g.textArea = textArea
+	g.TextArea = textArea
 	g.stdOutHdl = h
 	return nil
-}
-
-func (g *AppletGui) TextAppend(text string) {
-	// use fyne.Do so that it can be called in a go routine outside of
-	// the main loop
-	fyne.Do(func() {
-		g.textArea.Append(text)
-		g.textArea.Refresh()
-	})
 }
 
 func (g *AppletGui) AddAction(label string, action func()) {
@@ -111,13 +98,11 @@ func (g *AppletGui) AddAction(label string, action func()) {
 func (g *AppletGui) AddApplet(a *applet.Applet) {
 	label := fmt.Sprintf("%s - %s", a.Name, a.Comment)
 	action := func() {
-		g.textArea.SetText("")
+		g.TextArea.Set("")
 		go func() {
 			if err := a.Execute(); err != nil {
 				s := fmt.Sprintf("err: %s\n", err)
-				fyne.Do(func() {
-					g.textArea.Append(s)
-				})
+				g.TextArea.Append(s)
 			}
 		}()
 	}
@@ -129,16 +114,4 @@ func (g *AppletGui) Run() {
 	defer g.stdOutHdl.Stop()
 	g.win.Show()
 	g.app.Run()
-}
-
-// StartApplication is a standard way to initialize and start the
-// graphical application with all applets registered in the applets
-// catalog. Nevertheless, you may use directly the base class AppletGui.
-func StartApplication(title string) error {
-	gui, err := NewAppletGui(title)
-	if err != nil {
-		return err
-	}
-	gui.Run()
-	return nil
 }

@@ -19,15 +19,15 @@ func init() {
 	applet.AddApplet("D06", "echelle musicale", DEMO06_musicalscale)
 }
 
-// demo01 shows the standard way to run the applet graphical interface
-func demo01() error {
+// demo01_standard shows the standard way to run the applet graphical interface
+func demo01_standard() error {
 	return applet.StartApplication(title)
 }
 
-// demo02 shows a finer way to run the applet graphical interface, in
+// demo02_customize shows a finer way to run the applet graphical interface, in
 // particular to customize the actions. In this example, we add an
 // action in the buttons list of action.
-func demo02() error {
+func demo02_customize() error {
 	gui, err := applet.NewAppletGui(title)
 	if err != nil {
 		return err
@@ -35,17 +35,17 @@ func demo02() error {
 
 	gui.AddAction("Action 1", func() {
 		fmt.Println("Action 1")
-		gui.TextAppend("Hello action 1")
+		gui.TextArea.Append("Hello action 1")
 	})
 
 	gui.Run()
-	fmt.Printf("the application terminates")
+	fmt.Println("the application terminates")
 	return nil
 }
 
 func main() {
-	//demo := demo01
-	demo := demo02
+	//demo := demo01_standard
+	demo := demo02_customize
 	if err := demo(); err != nil {
 		log.Fatal(err)
 	}
