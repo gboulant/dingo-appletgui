@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
 	applet "github.com/gboulant/dingo-appletgui"
 )
 
@@ -16,6 +19,35 @@ func init() {
 	applet.AddApplet("D06", "echelle musicale", DEMO06_musicalscale)
 }
 
+// demo01 shows the standard way to run the applet graphical interface
+func demo01() error {
+	return applet.StartApplication(title)
+}
+
+// demo02 shows a finer way to run the applet graphical interface, in
+// particular to customize the actions. In this example, we add an
+// action in the buttons list of action.
+func demo02() error {
+	gui, err := applet.NewAppletGui(title)
+	if err != nil {
+		return err
+	}
+
+	gui.AddAction("Action 1", func() {
+		fmt.Println("Action 1")
+		gui.TextAppend("Hello action 1")
+	})
+
+	gui.Run()
+	fmt.Printf("the application terminates")
+	return nil
+}
+
 func main() {
-	applet.StartApplication(title)
+	//demo := demo01
+	demo := demo02
+	if err := demo(); err != nil {
+		log.Fatal(err)
+	}
+
 }
