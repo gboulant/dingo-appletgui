@@ -17,7 +17,7 @@ type AppletGui struct {
 	app        fyne.App
 	win        fyne.Window
 	ctnActions *fyne.Container
-	TextArea   *TextAreaWidget
+	TextArea   *TextAreaHandler
 	stdOutHdl  *stdrw.StdoutHandler
 }
 
@@ -43,7 +43,10 @@ func (g *AppletGui) Setup() error {
 	// --------------------------------------
 	// Text Area (center of the BorderLayout)
 	textArea := NewTextArea()
-	ctnCenter := container.NewVScroll(textArea.TextWidget)
+	ctnCenter := textArea.Container
+	// Note that the TextAreaHandler is not a widget and can not be
+	// displayed. It is composed of a scrollable Container containing a
+	// TextWidget, both can be handled.
 
 	// --------------------------------------
 	// Action Area (on the left)
@@ -98,7 +101,7 @@ func (g *AppletGui) AddAction(label string, action func()) {
 func (g *AppletGui) AddApplet(a *applet.Applet) {
 	label := fmt.Sprintf("%s - %s", a.Name, a.Comment)
 	action := func() {
-		g.TextArea.Set("")
+		g.TextArea.Clear()
 		go func() {
 			if err := a.Execute(); err != nil {
 				s := fmt.Sprintf("err: %s\n", err)
