@@ -1,7 +1,9 @@
 package appletgui
 
 import (
+	"embed"
 	"fmt"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,6 +13,9 @@ import (
 	applet "github.com/gboulant/dingo-applet"
 	stdrw "github.com/gboulant/dingo-stdrw"
 )
+
+//go:embed icons/*.png
+var icons embed.FS
 
 type AppletGui struct {
 	Title      string
@@ -51,10 +56,12 @@ func (g *AppletGui) Setup() error {
 	// --------------------------------------
 	// Action Area (on the left)
 	btnQuit := widget.NewButton("Quit", func() {
-		fmt.Print("On ferme toutes les fenêtres ... ")
+		log.Print("On ferme toutes les fenêtres ... ")
 		w.Close()
-		fmt.Println("done")
+		log.Println("done")
 	})
+	icondata, _ := icons.ReadFile("icons/quit.png")
+	btnQuit.Icon = fyne.NewStaticResource("quit", icondata)
 
 	// Define a customizable actions container embedded in a fixed
 	// container that will be placed in the left boder of the window
@@ -95,6 +102,7 @@ func (g *AppletGui) Setup() error {
 
 func (g *AppletGui) AddAction(label string, action func()) {
 	btn := widget.NewButton(label, action)
+	btn.Alignment = widget.ButtonAlignLeading
 	g.ctnActions.Add(btn)
 }
 
