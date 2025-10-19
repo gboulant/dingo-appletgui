@@ -4,11 +4,9 @@ go 1.24.3
 
 require (
 	fyne.io/fyne/v2 v2.7.0
-	github.com/gboulant/dingo-applet v0.0.0-20251017204704-eb0bce5a680c
-	github.com/gboulant/dingo-stdrw v0.0.0
+	github.com/gboulant/dingo-applet v0.0.0-20251018133234-350a84a6a000
+	github.com/gboulant/dingo-stdrw v0.0.0-20251018194218-3b3a5f4d8f71
 )
-
-replace github.com/gboulant/dingo-stdrw => ../stdrw
 
 require (
 	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58 // indirect
@@ -44,5 +42,3 @@ require (
 	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/gboulant/dingo-applet => ../applet
